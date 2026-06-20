@@ -1,0 +1,74 @@
+{% extends 'timetable/base.html' %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between mb-3">
+
+    <h2>Matières</h2>
+
+    {% if user.is_staff %}
+    <a href="{% url 'timetable:subject_create' %}"
+       class="btn btn-success">
+        Ajouter
+    </a>
+    {% endif %}
+
+</div>
+
+<table class="table table-bordered">
+
+    <thead>
+        <tr>
+            <th>Nom</th>
+            <th>Code</th>
+            <th>Type</th>
+            <th>Niveau</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+
+    <tbody>
+
+    {% for subject in subjects %}
+
+        <tr>
+
+            <td>{{ subject.name }}</td>
+
+            <td>{{ subject.code }}</td>
+
+            <td>{{ subject.get_course_type_display }}</td>
+
+            <td>{{ subject.level }}</td>
+
+            <td>
+
+                {% if user.is_staff %}
+
+                <a href="{% url 'timetable:subject_update' subject.id %}"
+                   class="btn btn-warning btn-sm">
+
+                    Modifier
+
+                </a>
+
+                <a href="{% url 'timetable:subject_delete' subject.id %}"
+                   class="btn btn-danger btn-sm">
+
+                    Supprimer
+
+                </a>
+
+                {% endif %}
+
+            </td>
+
+        </tr>
+
+    {% endfor %}
+
+    </tbody>
+
+</table>
+
+{% endblock %}

@@ -1,0 +1,26 @@
+{% extends 'timetable/base.html' %}
+
+{% block content %}
+
+<h2>Section</h2>
+
+<form method="post">
+
+    {% csrf_token %}
+
+    {{ form.as_p }}
+
+    <button class="btn btn-primary">
+        Enregistrer
+    </button>
+
+    <a href="{% url 'timetable:section_list' %}"
+       class="btn btn-secondary">
+
+        Retour
+
+    </a>
+
+</form>
+
+{% endblock %}

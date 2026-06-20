@@ -1,0 +1,96 @@
+{% extends 'timetable/base.html' %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between mb-3">
+    <h2>Emploi du temps hebdomadaire</h2>
+
+    <div>
+        <a href="{% url 'timetable:course_create' %}" class="btn btn-success">
+            Ajouter un cours
+        </a>
+
+        <a href="{% url 'timetable:export_excel' %}" class="btn btn-primary">
+            Export Excel
+        </a>
+    </div>
+</div>
+
+<table class="table table-bordered text-center align-middle">
+
+    <thead class="table-primary">
+        <tr>
+            <th>Jour</th>
+
+            {% for slot in time_slots %}
+                <th>{{ slot }}</th>
+            {% endfor %}
+        </tr>
+    </thead>
+
+    <tbody>
+
+        {% for day, slots in timetable.items %}
+
+            <tr>
+                <th class="table-secondary">{{ day }}</th>
+
+                {% for slot, course in slots.items %}
+
+                    <td style="min-width: 220px; height: 120px;">
+
+                        {% if course %}
+
+                            <strong>{{ course.subject.name }}</strong>
+                            <br>
+
+                            <small>
+                                {{ course.teacher }}
+                            </small>
+                            <br>
+
+                            <span class="badge bg-info text-dark">
+                                {{ course.level.name }}
+                            </span>
+                            <br>
+
+                            <span class="badge bg-secondary">
+                                Salle {{ course.room.name }}
+                            </span>
+                            <br><br>
+
+                            <a href="{% url 'timetable:course_update' course.id %}"
+                               class="btn btn-sm btn-warning">
+                                Modifier
+                            </a>
+
+                            <a href="{% url 'timetable:course_delete' course.id %}"
+                               class="btn btn-sm btn-danger">
+                                Supprimer
+                            </a>
+
+                        {% else %}
+
+                            <span class="text-muted">
+                                Libre
+                            </span>
+
+                        {% endif %}
+
+                    </td>
+
+                {% endfor %}
+
+            </tr>
+
+        {% endfor %}
+
+    </tbody>
+
+</table>
+
+<a href="{% url 'timetable:timetable_list' %}" class="btn btn-secondary">
+    Vue liste
+</a>
+
+{% endblock %}

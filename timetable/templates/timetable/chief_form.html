@@ -1,0 +1,19 @@
+{% extends 'timetable/base.html' %}
+
+{% block content %}
+
+<h2>Créer un chef de section</h2>
+
+<form method="post">
+
+    {% csrf_token %}
+
+    {{ form.as_p }}
+
+    <button class="btn btn-primary">
+        Enregistrer
+    </button>
+
+</form>
+
+{% endblock %}

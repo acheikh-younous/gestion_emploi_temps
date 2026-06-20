@@ -1,0 +1,29 @@
+{% extends 'timetable/base.html' %}
+
+{% block content %}
+
+<h2>Tableau de bord</h2>
+
+<div class="row">
+
+    <div class="col-md-4">
+
+        <div class="card text-bg-primary">
+
+            <div class="card-body">
+
+                <h5>Total cours programmés</h5>
+
+                <h1>
+                    {{ schedules_count }}
+                </h1>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

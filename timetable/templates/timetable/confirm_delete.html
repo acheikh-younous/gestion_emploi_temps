@@ -1,0 +1,26 @@
+{% extends 'timetable/base.html' %}
+
+{% block content %}
+
+<h3>Confirmation de suppression</h3>
+
+<div class="alert alert-warning">
+    Voulez-vous vraiment supprimer :
+    <strong>{{ object }}</strong> ?
+</div>
+
+<form method="post">
+
+    {% csrf_token %}
+
+    <button type="submit" class="btn btn-danger">
+        Oui, supprimer
+    </button>
+
+    <a href="javascript:history.back()" class="btn btn-secondary">
+        Annuler
+    </a>
+
+</form>
+
+{% endblock %}

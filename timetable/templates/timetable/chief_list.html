@@ -1,0 +1,80 @@
+{% extends 'timetable/base.html' %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between mb-3">
+
+    <h2>Chefs de section</h2>
+
+    <a href="{% url 'timetable:chief_create' %}"
+       class="btn btn-success">
+
+        Ajouter
+
+    </a>
+
+</div>
+
+<table class="table table-bordered">
+
+    <thead>
+
+        <tr>
+            <th>Utilisateur</th>
+            <th>Nom</th>
+            <th>Email</th>
+            <th>Section</th>
+            <th>Actions</th>
+        </tr>
+
+    </thead>
+
+    <tbody>
+
+        {% for chief in chiefs %}
+
+        <tr>
+
+            <td>{{ chief.username }}</td>
+
+            <td>
+                {{ chief.first_name }}
+                {{ chief.last_name }}
+            </td>
+
+            <td>{{ chief.email }}</td>
+
+            <td>{{ chief.managed_section }}</td>
+
+            <td>
+
+                <a href="{% url 'timetable:reset_chief_password' chief.id %}"
+                   class="btn btn-warning btn-sm">
+
+                    Réinitialiser MDP
+
+                </a>
+
+            </td>
+
+        </tr>
+
+        {% empty %}
+
+        <tr>
+
+            <td colspan="5">
+
+                Aucun chef enregistré.
+
+            </td>
+
+        </tr>
+
+        {% endfor %}
+
+    </tbody>
+
+</table>
+
+{% endblock %}

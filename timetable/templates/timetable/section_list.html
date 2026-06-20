@@ -1,0 +1,85 @@
+{% extends 'timetable/base.html' %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between mb-3">
+
+    <h2>Sections</h2>
+
+    {% if user.is_staff %}
+
+    <a href="{% url 'timetable:section_create' %}"
+       class="btn btn-success">
+
+        Ajouter
+
+    </a>
+
+    {% endif %}
+
+</div>
+
+<table class="table table-bordered">
+
+    <thead>
+
+        <tr>
+            <th>Nom</th>
+            <th>Département</th>
+            <th>Chef</th>
+            <th>Actions</th>
+        </tr>
+
+    </thead>
+
+    <tbody>
+
+        {% for section in sections %}
+
+        <tr>
+
+            <td>{{ section.name }}</td>
+
+            <td>{{ section.department }}</td>
+
+            <td>{{ section.chief }}</td>
+
+            <td>
+
+                {% if user.is_staff %}
+
+                <a href="{% url 'timetable:section_update' section.id %}"
+                   class="btn btn-warning btn-sm">
+
+                    Modifier
+
+                </a>
+
+                <a href="{% url 'timetable:section_delete' section.id %}"
+                   class="btn btn-danger btn-sm">
+
+                    Supprimer
+
+                </a>
+
+                {% endif %}
+
+            </td>
+
+        </tr>
+
+        {% empty %}
+
+        <tr>
+            <td colspan="4">
+                Aucune section.
+            </td>
+        </tr>
+
+        {% endfor %}
+
+    </tbody>
+
+</table>
+
+{% endblock %}

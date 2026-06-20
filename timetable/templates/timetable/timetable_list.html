@@ -1,0 +1,84 @@
+{% extends 'timetable/base.html' %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between mb-3">
+
+    <h2>Emploi du temps</h2>
+
+    <a href="{% url 'timetable:course_create' %}"
+       class="btn btn-success">
+
+        Ajouter un cours
+
+    </a>
+
+</div>
+
+<table class="table table-bordered table-striped">
+
+    <thead>
+
+        <tr>
+            <th>Jour</th>
+            <th>Créneau</th>
+            <th>Classe</th>
+            <th>Matière</th>
+            <th>Enseignant</th>
+            <th>Salle</th>
+            <th>Actions</th>
+        </tr>
+
+    </thead>
+
+    <tbody>
+
+    {% for course in schedules %}
+
+        <tr>
+
+            <td>{{ course.day }}</td>
+
+            <td>{{ course.time_slot }}</td>
+
+            <td>{{ course.level }}</td>
+
+            <td>{{ course.subject }}</td>
+
+            <td>{{ course.teacher }}</td>
+
+            <td>{{ course.room }}</td>
+
+            <td>
+
+                <a href="{% url 'timetable:course_update' course.id %}"
+                   class="btn btn-warning btn-sm">
+                    Modifier
+                </a>
+
+                <a href="{% url 'timetable:course_delete' course.id %}"
+                   class="btn btn-danger btn-sm">
+                    Supprimer
+                </a>
+
+            </td>
+
+        </tr>
+
+    {% empty %}
+
+        <tr>
+
+            <td colspan="7">
+                Aucun cours.
+            </td>
+
+        </tr>
+
+    {% endfor %}
+
+    </tbody>
+
+</table>
+
+{% endblock %}

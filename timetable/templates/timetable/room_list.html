@@ -1,0 +1,79 @@
+{% extends 'timetable/base.html' %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between mb-3">
+
+    <h2>Salles</h2>
+
+    {% if user.is_staff %}
+    <a href="{% url 'timetable:room_create' %}"
+       class="btn btn-success">
+        Ajouter
+    </a>
+    {% endif %}
+
+</div>
+
+<table class="table table-bordered">
+
+    <thead>
+        <tr>
+            <th>Nom</th>
+            <th>Capacité</th>
+            <th>Type</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+
+    <tbody>
+
+        {% for room in rooms %}
+
+        <tr>
+
+            <td>{{ room.name }}</td>
+
+            <td>{{ room.capacity }}</td>
+
+            <td>{{ room.get_room_type_display }}</td>
+
+            <td>
+
+                {% if user.is_staff %}
+
+                <a href="{% url 'timetable:room_update' room.id %}"
+                   class="btn btn-warning btn-sm">
+
+                    Modifier
+
+                </a>
+
+                <a href="{% url 'timetable:room_delete' room.id %}"
+                   class="btn btn-danger btn-sm">
+
+                    Supprimer
+
+                </a>
+
+                {% endif %}
+
+            </td>
+
+        </tr>
+
+        {% empty %}
+
+        <tr>
+            <td colspan="4">
+                Aucune salle enregistrée.
+            </td>
+        </tr>
+
+        {% endfor %}
+
+    </tbody>
+
+</table>
+
+{% endblock %}

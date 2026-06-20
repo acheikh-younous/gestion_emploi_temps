@@ -1,0 +1,84 @@
+{% extends 'timetable/base.html' %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between mb-3">
+
+    <h2>Enseignants</h2>
+
+    {% if user.is_staff %}
+
+    <a href="{% url 'timetable:teacher_create' %}"
+       class="btn btn-success">
+
+        Ajouter
+
+    </a>
+
+    {% endif %}
+
+</div>
+
+<table class="table table-bordered">
+
+    <thead>
+
+        <tr>
+            <th>Nom</th>
+            <th>Téléphone</th>
+            <th>Email</th>
+            <th>Actions</th>
+        </tr>
+
+    </thead>
+
+    <tbody>
+
+        {% for teacher in teachers %}
+
+        <tr>
+
+            <td>
+                {{ teacher.first_name }}
+                {{ teacher.last_name }}
+            </td>
+
+            <td>
+                {{ teacher.phone }}
+            </td>
+
+            <td>
+                {{ teacher.email }}
+            </td>
+
+            <td>
+
+                {% if user.is_staff %}
+
+                <a href="{% url 'timetable:teacher_update' teacher.id %}"
+                   class="btn btn-warning btn-sm">
+
+                    Modifier
+
+                </a>
+
+                <a href="{% url 'timetable:teacher_delete' teacher.id %}"
+                   class="btn btn-danger btn-sm">
+
+                    Supprimer
+
+                </a>
+
+                {% endif %}
+
+            </td>
+
+        </tr>
+
+        {% endfor %}
+
+    </tbody>
+
+</table>
+
+{% endblock %}

@@ -29,7 +29,7 @@ SECRET_KEY = config('SECRET_KEY') # The new change for render deployment
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = [*]
+ALLOWED_HOSTS = ["*"] # The new change for render deployment
 
 
 # Application definition
@@ -95,9 +95,8 @@ DATABASES = {
 #Usinng PostgreSQL database for render deployment
 DATABASES = {
     "default": dj_database_url.config(
-        default=config("DATABASE_URL", default="sqlite:///db.sqlite3"),
-        conn_max_age=600,
-        ssl_require=True
+        default=config("DATABASE_URL", default="sqlite:///db.sqlite3")
+       
     )
 }
 

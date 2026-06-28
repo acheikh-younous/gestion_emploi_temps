@@ -22,7 +22,6 @@ class Section(models.Model):
         on_delete=models.CASCADE,
         related_name="sections"
     )
-
     chief = models.OneToOneField(
         User,
         on_delete=models.SET_NULL,
@@ -58,10 +57,22 @@ class Level(models.Model):
 
 
 class Teacher(models.Model):
+    STATUS_CHOICES = [
+        ("PERMANENT", "Permanent"),
+        ("VACATAIRE", "Vacataire"),
+    ]
+
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
     phone = models.CharField(max_length=30, blank=True, null=True)
     email = models.EmailField(blank=True, null=True)
+    grade = models.CharField(max_length=100, blank=True, null=True)
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default="PERMANENT"
+    )
+    speciality = models.CharField(max_length=150, blank=True, null=True)
 
     class Meta:
         verbose_name = "Enseignant"
@@ -72,20 +83,21 @@ class Teacher(models.Model):
 
 
 class Subject(models.Model):
-    COURSE_TYPES = [
-        ("CM", "Cours magistral"),
-        ("TD", "Travaux dirigés"),
-        ("TP", "Travaux pratiques"),
-    ]
-
     name = models.CharField(max_length=150)
     code = models.CharField(max_length=30, blank=True, null=True)
-    course_type = models.CharField(max_length=10, choices=COURSE_TYPES, default="CM")
     level = models.ForeignKey(
         Level,
         on_delete=models.CASCADE,
         related_name="subjects"
     )
+    created_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="created_subjects"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         verbose_name = "Matière"
@@ -93,7 +105,7 @@ class Subject(models.Model):
         unique_together = ("name", "level")
 
     def __str__(self):
-        return f"{self.name} ({self.level.name})"
+        return f"{self.name} - {self.level.name}"
 
 
 class Room(models.Model):
@@ -105,7 +117,11 @@ class Room(models.Model):
 
     name = models.CharField(max_length=100, unique=True)
     capacity = models.PositiveIntegerField(default=0)
-    room_type = models.CharField(max_length=10, choices=ROOM_TYPES, default="CM")
+    room_type = models.CharField(
+        max_length=10,
+        choices=ROOM_TYPES,
+        default="CM"
+    )
 
     class Meta:
         verbose_name = "Salle"
@@ -129,6 +145,48 @@ class TimeSlot(models.Model):
         return f"{self.start_time.strftime('%Hh%M')} - {self.end_time.strftime('%Hh%M')}"
 
 
+class AcademicYear(models.Model):
+    name = models.CharField(max_length=20, unique=True)
+    start_date = models.DateField()
+    end_date = models.DateField()
+    is_active = models.BooleanField(default=False)
+
+    class Meta:
+        verbose_name = "Année académique"
+        verbose_name_plural = "Années académiques"
+        ordering = ["-start_date"]
+
+    def __str__(self):
+        return self.name
+
+
+class AcademicWeek(models.Model):
+    academic_year = models.ForeignKey(
+        AcademicYear,
+        on_delete=models.CASCADE,
+        related_name="weeks"
+    )
+    week_number = models.PositiveIntegerField()
+    start_date = models.DateField()
+    end_date = models.DateField()
+    is_active = models.BooleanField(default=False)
+    is_locked = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Semaine académique"
+        verbose_name_plural = "Semaines académiques"
+        ordering = ["-start_date"]
+        unique_together = ("academic_year", "week_number")
+
+    @property
+    def title(self):
+        return f"Semaine {self.week_number}"
+
+    def __str__(self):
+        return f"{self.title} - {self.academic_year.name}"
+
+
 class CourseSchedule(models.Model):
     DAYS = [
         ("LUNDI", "Lundi"),
@@ -139,37 +197,59 @@ class CourseSchedule(models.Model):
         ("SAMEDI", "Samedi"),
     ]
 
+    COURSE_TYPES = [
+        ("CM", "Cours magistral"),
+        ("TD", "Travaux dirigés"),
+        ("TP", "Travaux pratiques"),
+    ]
+
+    EVENT_TYPES = [
+        ("CT", "Cours Théorique"),
+        ("CC", "Contrôle Continu"),
+        ("ET", "Examen Terminal"),
+        ("ER", "Examen de Rattrapage"),
+        ("SEMINAIRE", "Séminaire"),
+        ("SOUTENANCE", "Soutenance"),
+        ("CONFERENCE", "Conférence"),
+    ]
+
+    week = models.ForeignKey(
+        AcademicWeek,
+        on_delete=models.CASCADE,
+        related_name="schedules"
+    )
     subject = models.ForeignKey(
         Subject,
         on_delete=models.CASCADE,
         related_name="schedules"
     )
-
     teacher = models.ForeignKey(
         Teacher,
         on_delete=models.CASCADE,
         related_name="schedules"
     )
-
-    level = models.ForeignKey(
-        Level,
-        on_delete=models.CASCADE,
-        related_name="schedules"
-    )
-
     room = models.ForeignKey(
         Room,
         on_delete=models.CASCADE,
         related_name="schedules"
     )
-
     day = models.CharField(max_length=20, choices=DAYS)
     time_slot = models.ForeignKey(
         TimeSlot,
         on_delete=models.CASCADE,
         related_name="schedules"
     )
-
+    course_type = models.CharField(
+        max_length=10,
+        choices=COURSE_TYPES,
+        default="CM"
+    )
+    event_type = models.CharField(
+        max_length=30,
+        choices=EVENT_TYPES,
+        default="CT"
+    )
+    remark = models.TextField(blank=True, null=True)
     created_by = models.ForeignKey(
         User,
         on_delete=models.SET_NULL,
@@ -177,56 +257,56 @@ class CourseSchedule(models.Model):
         blank=True,
         related_name="created_schedules"
     )
-
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         verbose_name = "Cours programmé"
         verbose_name_plural = "Cours programmés"
-        ordering = ["day", "time_slot__start_time"]
+        ordering = ["week__start_date", "day", "time_slot__start_time"]
+
+    @property
+    def level(self):
+        return self.subject.level
+
+    @property
+    def section(self):
+        return self.subject.level.section
 
     def clean(self):
         errors = {}
 
-        # Vérifier que la matière appartient bien au niveau choisi
-        if self.subject and self.level:
-            if self.subject.level != self.level:
-                errors["subject"] = "Cette matière n'appartient pas à cette classe / ce niveau."
+        if self.week and self.week.is_locked:
+            errors["week"] = "Cette semaine est verrouillée. Elle ne peut plus être modifiée."
 
-        # Conflit enseignant
-        teacher_conflict = CourseSchedule.objects.filter(
-            teacher=self.teacher,
-            day=self.day,
-            time_slot=self.time_slot
-        ).exclude(pk=self.pk)
+        if self.week and self.teacher and self.day and self.time_slot:
+            if CourseSchedule.objects.filter(
+                week=self.week,
+                teacher=self.teacher,
+                day=self.day,
+                time_slot=self.time_slot
+            ).exclude(pk=self.pk).exists():
+                errors["teacher"] = "Cet enseignant a déjà un cours à ce créneau."
 
-        if teacher_conflict.exists():
-            errors["teacher"] = "Cet enseignant a déjà un cours à ce créneau."
+        if self.week and self.subject and self.day and self.time_slot:
+            if CourseSchedule.objects.filter(
+                week=self.week,
+                subject__level=self.subject.level,
+                day=self.day,
+                time_slot=self.time_slot
+            ).exclude(pk=self.pk).exists():
+                errors["subject"] = "Cette classe a déjà un cours à ce créneau."
 
-        # Conflit classe / niveau
-        level_conflict = CourseSchedule.objects.filter(
-            level=self.level,
-            day=self.day,
-            time_slot=self.time_slot
-        ).exclude(pk=self.pk)
+        if self.week and self.room and self.day and self.time_slot:
+            if CourseSchedule.objects.filter(
+                week=self.week,
+                room=self.room,
+                day=self.day,
+                time_slot=self.time_slot
+            ).exclude(pk=self.pk).exists():
+                errors["room"] = "Cette salle est déjà utilisée à ce créneau."
 
-        if level_conflict.exists():
-            errors["level"] = "Cette classe a déjà un cours à ce créneau."
-
-        # Conflit salle
-        room_conflict = CourseSchedule.objects.filter(
-            room=self.room,
-            day=self.day,
-            time_slot=self.time_slot
-        ).exclude(pk=self.pk)
-
-        if room_conflict.exists():
-            errors["room"] = "Cette salle est déjà utilisée à ce créneau."
-
-        # Salle adaptée au type de cours
-        if self.subject and self.room:
-            if self.subject.course_type == "TP" and self.room.room_type != "TP":
-                errors["room"] = "Pour un TP, il est préférable de choisir une salle TP / laboratoire."
+        if self.course_type == "TP" and self.room and self.room.room_type != "TP":
+            errors["room"] = "Pour un TP, il faut choisir une salle TP / laboratoire."
 
         if errors:
             raise ValidationError(errors)
@@ -236,4 +316,4 @@ class CourseSchedule(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.subject.name} - {self.level.name} - {self.day} - {self.time_slot}"
+        return f"{self.subject.name} - {self.day} - {self.time_slot}"

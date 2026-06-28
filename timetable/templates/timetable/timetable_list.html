@@ -1,84 +1,135 @@
-{% extends 'timetable/base.html' %}
+{% extends "timetable/base.html" %}
 
 {% block content %}
 
-<div class="d-flex justify-content-between mb-3">
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Liste des emplois du temps</h4>
 
-    <h2>Emploi du temps</h2>
-
-    <a href="{% url 'timetable:course_create' %}"
-       class="btn btn-success">
-
-        Ajouter un cours
-
+    <a href="{% url 'timetable:course_create' %}" class="btn btn-primary">
+        Ajouter une programmation
     </a>
-
 </div>
 
-<table class="table table-bordered table-striped">
+<form method="get" class="row g-3 mb-4">
 
-    <thead>
+    <div class="col-md-3">
+        <label class="form-label">Semaine</label>
+        <select name="week" class="form-select">
+            <option value="">Toutes les semaines</option>
+            {% for week in weeks %}
+                <option value="{{ week.id }}"
+                    {% if selected_week and selected_week.id == week.id %}selected{% endif %}>
+                    {{ week.title }} - {{ week.academic_year.name }}
+                </option>
+            {% endfor %}
+        </select>
+    </div>
 
-        <tr>
-            <th>Jour</th>
-            <th>Créneau</th>
-            <th>Classe</th>
-            <th>Matière</th>
-            <th>Enseignant</th>
-            <th>Salle</th>
-            <th>Actions</th>
-        </tr>
+    <div class="col-md-3">
+        <label class="form-label">Département</label>
+        <select name="department" class="form-select">
+            <option value="">Tous les départements</option>
+            {% for department in departments %}
+                <option value="{{ department.id }}"
+                    {% if selected_department_id == department.id|stringformat:"s" %}selected{% endif %}>
+                    {{ department.name }}
+                </option>
+            {% endfor %}
+        </select>
+    </div>
 
-    </thead>
+    <div class="col-md-3">
+        <label class="form-label">Section</label>
+        <select name="section" class="form-select">
+            <option value="">Toutes les sections</option>
+            {% for section in sections %}
+                <option value="{{ section.id }}"
+                    {% if selected_section_id == section.id|stringformat:"s" %}selected{% endif %}>
+                    {{ section.department.name }} - {{ section.name }}
+                </option>
+            {% endfor %}
+        </select>
+    </div>
 
-    <tbody>
+    <div class="col-md-3">
+        <label class="form-label">Niveau</label>
+        <select name="level" class="form-select">
+            <option value="">Tous les niveaux</option>
+            {% for level in levels %}
+                <option value="{{ level.id }}"
+                    {% if selected_level_id == level.id|stringformat:"s" %}selected{% endif %}>
+                    {{ level.section.name }} - {{ level.name }}
+                </option>
+            {% endfor %}
+        </select>
+    </div>
 
-    {% for course in schedules %}
+    <div class="col-12">
+        <button type="submit" class="btn btn-primary">
+            Filtrer
+        </button>
 
-        <tr>
+        <a href="{% url 'timetable:timetable_list' %}" class="btn btn-outline-secondary">
+            Réinitialiser
+        </a>
+    </div>
 
-            <td>{{ course.day }}</td>
+</form>
 
-            <td>{{ course.time_slot }}</td>
+<div class="table-responsive">
+    <table class="table table-bordered table-hover align-middle">
+        <thead class="table-dark">
+            <tr>
+                <th>Département</th>
+                <th>Section</th>
+                <th>Niveau</th>
+                <th>Semaine</th>
+                <th>Jour</th>
+                <th>Créneau</th>
+                <th>Matière</th>
+                <th>Type séance</th>
+                <th>Type événement</th>
+                <th>Enseignant</th>
+                <th>Salle</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
 
-            <td>{{ course.level }}</td>
+        <tbody>
+            {% for schedule in schedules %}
+                <tr>
+                    <td>{{ schedule.subject.level.section.department.name }}</td>
+                    <td>{{ schedule.subject.level.section.name }}</td>
+                    <td>{{ schedule.subject.level.name }}</td>
+                    <td>{{ schedule.week.title }}</td>
+                    <td>{{ schedule.get_day_display }}</td>
+                    <td>{{ schedule.time_slot }}</td>
+                    <td>{{ schedule.subject.name }}</td>
+                    <td>{{ schedule.get_course_type_display }}</td>
+                    <td>{{ schedule.get_event_type_display }}</td>
+                    <td>{{ schedule.teacher }}</td>
+                    <td>{{ schedule.room }}</td>
+                    <td>
+                        <a href="{% url 'timetable:course_update' schedule.id %}"
+                           class="btn btn-sm btn-warning">
+                            Modifier
+                        </a>
 
-            <td>{{ course.subject }}</td>
-
-            <td>{{ course.teacher }}</td>
-
-            <td>{{ course.room }}</td>
-
-            <td>
-
-                <a href="{% url 'timetable:course_update' course.id %}"
-                   class="btn btn-warning btn-sm">
-                    Modifier
-                </a>
-
-                <a href="{% url 'timetable:course_delete' course.id %}"
-                   class="btn btn-danger btn-sm">
-                    Supprimer
-                </a>
-
-            </td>
-
-        </tr>
-
-    {% empty %}
-
-        <tr>
-
-            <td colspan="7">
-                Aucun cours.
-            </td>
-
-        </tr>
-
-    {% endfor %}
-
-    </tbody>
-
-</table>
+                        <a href="{% url 'timetable:course_delete' schedule.id %}"
+                           class="btn btn-sm btn-danger">
+                            Supprimer
+                        </a>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="12" class="text-center text-muted">
+                        Aucun emploi du temps trouvé.
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
 
 {% endblock %}

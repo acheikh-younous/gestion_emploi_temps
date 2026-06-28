@@ -1,30 +1,40 @@
 {% extends 'timetable/base.html' %}
+{% load static %}
 
 {% block content %}
 
-<div class="d-flex justify-content-between mb-3">
-    <h2>Emploi du temps hebdomadaire</h2>
+<div class="text-center mb-4">
+    <img src="{% static 'timetable/images/logo.png' %}" alt="Logo" style="height: 80px;">
+    <h2 class="mt-2">Emploi du temps hebdomadaire</h2>
 
-    <div>
-        <a href="{% url 'timetable:course_create' %}" class="btn btn-success">
-            Ajouter un cours
-        </a>
-
-        <a href="{% url 'timetable:export_excel' %}" class="btn btn-primary">
-            Export Excel
-        </a>
-    </div>
+    {% if not user.is_staff %}
+        <p>
+            Section :
+            <strong>{{ user.managed_section.name }}</strong>
+        </p>
+    {% endif %}
 </div>
 
-<table class="table table-bordered text-center align-middle">
+<div class="d-flex justify-content-between mb-3">
+    <a href="{% url 'timetable:course_create' %}" class="btn btn-success">
+        Ajouter un cours
+    </a>
+
+    <a href="{% url 'timetable:export_excel' %}" class="btn btn-primary">
+        Export Excel
+    </a>
+</div>
+
+<table class="table table-bordered text-center align-middle bg-white">
 
     <thead class="table-primary">
         <tr>
             <th>Jour</th>
-
-            {% for slot in time_slots %}
-                <th>{{ slot }}</th>
-            {% endfor %}
+            <th>07h30 - 09h30</th>
+            <th>09h30 - 09h45</th>
+            <th>09h45 - 12h45</th>
+            <th>12h45 - 14h00</th>
+            <th>14h00 - 17h00</th>
         </tr>
     </thead>
 
@@ -32,56 +42,62 @@
 
         {% for day, slots in timetable.items %}
 
-            <tr>
-                <th class="table-secondary">{{ day }}</th>
+        <tr>
+            <th class="table-secondary">{{ day }}</th>
 
-                {% for slot, course in slots.items %}
+            {% for item in slots %}
 
-                    <td style="min-width: 220px; height: 120px;">
+                {% if item.type == "pause" %}
 
-                        {% if course %}
+                    <td class="table-warning">
+                        <strong>{{ item.label }}</strong>
+                    </td>
 
-                            <strong>{{ course.subject.name }}</strong>
+                {% else %}
+
+                    <td style="min-width: 190px; height: 120px;">
+
+                        {% if item.course %}
+
+                            <strong>{{ item.course.subject.name }}</strong>
                             <br>
 
-                            <small>
-                                {{ course.teacher }}
-                            </small>
+                            <small>{{ item.course.teacher }}</small>
                             <br>
 
                             <span class="badge bg-info text-dark">
-                                {{ course.level.name }}
+                                {{ item.course.level.name }}
                             </span>
                             <br>
 
                             <span class="badge bg-secondary">
-                                Salle {{ course.room.name }}
+                                Salle {{ item.course.room.name }}
                             </span>
                             <br><br>
 
-                            <a href="{% url 'timetable:course_update' course.id %}"
+                            <a href="{% url 'timetable:course_update' item.course.id %}"
                                class="btn btn-sm btn-warning">
                                 Modifier
                             </a>
 
-                            <a href="{% url 'timetable:course_delete' course.id %}"
+                            <a href="{% url 'timetable:course_delete' item.course.id %}"
                                class="btn btn-sm btn-danger">
                                 Supprimer
                             </a>
 
                         {% else %}
 
-                            <span class="text-muted">
-                                Libre
-                            </span>
+                            <span class="text-muted">Libre</span>
 
                         {% endif %}
 
                     </td>
 
-                {% endfor %}
+                {% endif %}
 
-            </tr>
+            {% endfor %}
+
+        </tr>
 
         {% endfor %}
 
@@ -89,8 +105,16 @@
 
 </table>
 
-<a href="{% url 'timetable:timetable_list' %}" class="btn btn-secondary">
-    Vue liste
-</a>
+{% if not user.is_staff %}
+<div class="text-end mt-5">
+    <p>
+        Le Chef de section
+    </p>
+    <br>
+    <strong>
+        {{ user.first_name }} {{ user.last_name }}
+    </strong>
+</div>
+{% endif %}
 
 {% endblock %}

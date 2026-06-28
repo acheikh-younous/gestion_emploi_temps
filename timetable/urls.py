@@ -218,4 +218,11 @@ urlpatterns = [
         views.chief_create,
         name="chief_create"
     ),
-]
+
+
+
+    path("semaines/", views.week_list, name="week_list"),
+    path("semaines/ajouter/", views.week_create, name="week_create"),
+    path("semaines/<int:pk>/modifier/", views.week_update, name="week_update"),
+    path("semaines/<int:pk>/supprimer/", views.week_delete, name="week_delete"),
+    ]

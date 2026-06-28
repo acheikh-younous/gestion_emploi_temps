@@ -4,6 +4,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 
 from timetable.forms import SubjectForm
 from timetable.models import Subject
+from timetable.models import AcademicWeek, CourseSchedule, Department, Level, Section, TimeSlot
 from timetable.services.permission_service import user_can_manage_subject
 
 
